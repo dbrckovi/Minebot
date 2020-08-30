@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SourceFileCollection xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Profile>Reach</Profile>
+  <Platform>DesktopGL</Platform>
+  <Config />
+  <SourceFiles>
+    <File>D:/git/Minebot/Pyomm/Pyomm/Content/Miner.png</File>
+    <File>D:/git/Minebot/Pyomm/Pyomm/Content/Tile_Blue_Overlay.png</File>
+    <File>D:/git/Minebot/Pyomm/Pyomm/Content/Tile_Green_Overlay.png</File>
+    <File>D:/git/Minebot/Pyomm/Pyomm/Content/Tile_Lava.png</File>
+    <File>D:/git/Minebot/Pyomm/Pyomm/Content/Tile_Normal.png</File>
+    <File>D:/git/Minebot/Pyomm/Pyomm/Content/Tile_Ore.png</File>
+    <File>D:/git/Minebot/Pyomm/Pyomm/Content/Tile_Red_Overlay.png</File>
+    <File>D:/git/Minebot/Pyomm/Pyomm/Content/Tile_Selected.png</File>
+  </SourceFiles>
+  <DestFiles>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
+  </DestFiles>
+</SourceFileCollection>
