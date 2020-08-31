@@ -1,0 +1,37 @@
+[TILES]
+;X - lava
+;. - empty
+;O - ore
+;r - empty with red flare
+;g - empty with green flare
+;b - empty with blue flare
+;R - with ore and red flare
+;G - with ore and green flare
+;B - with ore and blue flare
+XXXXXXXXXXXXXXXX
+X..............X
+X..............X
+X..............X
+X..............X
+X..............X
+X..............X
+X..............X
+X..............X
+X..............X
+X..............X
+X..............X
+X..............X
+X..............X
+X..............X
+XXXXXXXXXXXXXXXX
+[SETTINGS]
+PlayerStart=4,14
+MainMemory=10
+F1Memory=5
+F2Memory=6
+F3Memory=7
+AllowedCommands=RL,RR,GO,PR,PG,PB
+SolutionMain=
+SolutionF1=
+SolutionF2=
+SolutionF3=

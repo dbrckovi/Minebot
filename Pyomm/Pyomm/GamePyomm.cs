@@ -2,11 +2,13 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.IO;
 
 namespace Pyomm
 {
   public class GamePyomm : Game
   {
+    private Level _currentLevel;
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private bool _editMode = false;
@@ -23,10 +25,20 @@ namespace Pyomm
 
     protected override void Initialize()
     {
-      Tile.InitializeTileArray(_tiles);
       _graphics.PreferredBackBufferWidth = 1280;
       _graphics.PreferredBackBufferHeight = 800;
       _graphics.ApplyChanges();
+
+      _currentLevel = new Level(File.ReadAllText("DefaultLevel.lev"));
+
+      for (int x = 0; x <= _tiles.GetUpperBound(0); x++)
+      {
+        for (int y = 0; y <= _tiles.GetUpperBound(0); y++)
+        {
+          _tiles[x, y] = _currentLevel.Tiles[x, y].Copy();
+        }
+      }
+
       base.Initialize();
     }
 

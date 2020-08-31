@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 using System.Text;
 
 namespace Pyomm
@@ -12,7 +13,7 @@ namespace Pyomm
     public bool Lava = false;
     public bool HasOre = false;
     public HighlightType Flare = HighlightType.None;
-    public Vector2 Index;
+    public Point Index;
     public Vector2 World_Center;
 
     public Tile(int x, int y)
@@ -23,29 +24,25 @@ namespace Pyomm
       World_Center = TileIndexToWorld(x, y);
     }
 
-    public static void InitializeTileArray(Tile[,] array)
+    /// <summary>
+    /// Copies the current tile to a new tile
+    /// </summary>
+    /// <returns></returns>
+    public Tile Copy()
     {
-      for (int x = 0; x < array.GetUpperBound(0); x++)
-      {
-        for (int y = 0; y < array.GetUpperBound(1); y++)
-        {
-          array[x, y] = new Tile(x, y);
-        }
-      }
-
-      array[5, 5].HasOre = true;
-      array[6, 5].Flare = HighlightType.Red;
-      array[7, 5].Flare = HighlightType.Green;
-      array[8, 5].Flare = HighlightType.Blue;
-      array[8, 5].HasOre = true;
-      array[9, 5].Lava = true;
+      Tile ret = new Tile(Index.X, Index.Y);
+      ret.Lava = Lava;
+      ret.HasOre = HasOre;
+      ret.Flare = Flare;
+      ret.World_Center = World_Center;
+      return ret;
     }
 
     public static void DrawTiles(SpriteBatch spriteBatch, Tile[,] _tiles)
     {
-      for (int x = 0; x < _tiles.GetUpperBound(0); x++)
+      for (int x = 0; x <= _tiles.GetUpperBound(0); x++)
       {
-        for (int y = 0; y < _tiles.GetUpperBound(1); y++)
+        for (int y = 0; y <= _tiles.GetUpperBound(1); y++)
         {
           DrawTile(x, y, _tiles[x, y], spriteBatch);
         }
