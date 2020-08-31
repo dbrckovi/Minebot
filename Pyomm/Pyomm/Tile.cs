@@ -76,15 +76,5 @@ namespace Pyomm
 
       return ret;
     }
-
-    public static Vector2 WorldToTileIndex (int x, int y)
-    {
-      Vector2 ret = new Vector2();
-
-      ret.Y = y / (DefaultSize.Y * 3 / 4 + DefaultSize.Y / 2);
-      ret.X = x / (DefaultSize.X + DefaultSize.X / 2);
-
-      return ret;
-    }
   }
 }

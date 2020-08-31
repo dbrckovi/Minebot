@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.IO;
+using System.Net.Http.Headers;
 
 namespace Pyomm
 {
@@ -15,6 +16,7 @@ namespace Pyomm
     private Tile[,] _tiles = new Tile[16, 16];
     Color _playColor = new Color(117, 94, 57);
     Color _editColor = new Color(50, 45, 27);
+    Tile selectedTile = null;
 
     public GamePyomm()
     {
@@ -55,13 +57,10 @@ namespace Pyomm
 
       if (keyboard.IsKeyDown(Keys.Escape)) Exit();
 
-      Vector2 approx = Tile.WorldToTileIndex(mouse.X, mouse.Y);
-
-      //int approxIndexY = mouse.Y / (Convert.ToInt32(Tile.DefaultSize.Y * 3/4));
-      //int approxIndexX = mouse.X / Convert.ToInt32(Tile.DefaultSize.X);
-      
-      
-      this.Window.Title = $"{mouse.X}, {mouse.Y}     |     {approx.X}, {approx.Y}";
+      if (mouse.LeftButton == ButtonState.Pressed)
+      {
+        selectedTile = GetTileUnderMouse(new Vector2(mouse.X, mouse.Y));
+      }
 
       base.Update(gameTime);
     }
@@ -72,9 +71,63 @@ namespace Pyomm
 
       _spriteBatch.Begin();
       Tile.DrawTiles(_spriteBatch, _tiles);
+      if (selectedTile != null) DrawSelectedTile();
       _spriteBatch.End();
 
       base.Draw(gameTime);
+    }
+
+    private void DrawSelectedTile()
+    {
+      Vector2 tileCenter = new Vector2(Tile.DefaultSize.X / 2, Tile.DefaultSize.Y / 2);
+      _spriteBatch.Draw(Asset.tileSelection, selectedTile.World_Center, null, Color.White, 0f, tileCenter, Vector2.One, SpriteEffects.None, 0f);
+    }
+
+    private Tile GetTileUnderMouse(Vector2 mouse)
+    {
+      //TODO: rewrite without approximations
+
+      Tile ret = null;
+      float distanceToRet = 10000f;
+
+      //approximate X and Y index of the tile
+      int approxX = Convert.ToInt32(mouse.X / 57f); 
+      int approxY = Convert.ToInt32(mouse.Y / 49f);
+
+      //scan a couple of nearest tiles to determine the closest
+      int scanXFrom = approxX - 2;
+      int scanXTo = approxX + 2;
+      int scanYFrom = approxY - 2;
+      int scanYTo = approxY + 2;
+      if (scanXFrom < 0) scanXFrom = 0;
+      if (scanXFrom > 15) return null;
+      if (scanXTo > 15) scanXTo = 15;
+      if (scanXTo < 0) return null;
+      if (scanYFrom < 0) scanYFrom = 0;
+      if (scanYFrom > 15) return null;
+      if (scanYTo > 15) scanYTo = 15;
+      if (scanYTo < 0) return null;
+
+      float minimumDistance = 32; 
+
+      for (int x = scanXFrom; x <= scanXTo; x++)
+      {
+        for (int y = scanYFrom; y <= scanYTo; y++)
+        {
+          Vector2 tileCenter = _tiles[x, y].World_Center;
+          float distance = Vector2.Distance(tileCenter, mouse);
+          if (distance <= minimumDistance)
+          {
+            if (ret == null || distance < distanceToRet)
+            {
+              ret = _tiles[x, y];
+              distanceToRet = distance;
+            }
+          }
+        }
+      }
+
+      return ret;
     }
   }
 }
