@@ -4,11 +4,10 @@ using System.Text;
 
 namespace Pyomm
 {
-  public enum HighlightType
+  public enum MouseButton
   {
-    None = 0,
-    Red = 1,
-    Green = 2,
-    Blue = 3
+    Left = 0,
+    Right = 1,
+    Middle = 2
   }
 }

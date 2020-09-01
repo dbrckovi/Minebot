@@ -8,7 +8,7 @@ namespace Pyomm
   public class Level
   {
     public Tile[,] Tiles = new Tile[16, 16];
-    public Point PlayerStart = new Point(0, 0);
+    public PlayerInfo PlayerStart = new PlayerInfo();
     public int MainMemory = 10;
     int F1Memory = 5;
     int F2Memory = 5;
@@ -73,7 +73,12 @@ namespace Pyomm
         case "PlayerStart":
           {
             string[] coords = value.Split(',');
-            PlayerStart = new Point(int.Parse(coords[0]), int.Parse(coords[1]));
+            PlayerStart.Location = new Point(int.Parse(coords[0]), int.Parse(coords[1]));
+            break;
+          }
+        case "PlayerDirection":
+          {
+            PlayerStart.Direction = (Direction)int.Parse(value);
             break;
           }
         case "MainMemory": MainMemory = int.Parse(value); break;

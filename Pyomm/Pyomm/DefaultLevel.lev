@@ -25,7 +25,8 @@ X..............X
 X..............X
 XXXXXXXXXXXXXXXX
 [SETTINGS]
-PlayerStart=4,14
+PlayerStart=5,5
+PlayerDirection=3
 MainMemory=10
 F1Memory=5
 F2Memory=6

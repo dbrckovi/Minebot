@@ -3,16 +3,51 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 namespace Pyomm
 {
   public class Tile
   {
+    private bool _lava = false;
+    private HighlightType _flare = HighlightType.None;
+    private bool _hasOre = false;
+
     public static Vector2 DefaultSize = new Vector2(56, 64);
-    public bool Lava = false;
-    public bool HasOre = false;
-    public HighlightType Flare = HighlightType.None;
+    public bool Lava
+    {
+      get { return _lava; }
+      set 
+      { 
+        _lava = value; 
+        if (_lava)
+        {
+          _flare = HighlightType.None;
+          _hasOre = false;
+        }
+      }
+    }
+
+    public bool HasOre
+    {
+      get { return _hasOre; }
+      set 
+      {
+        _hasOre = value;
+        if (_hasOre) _lava = false;
+      }
+    }
+
+    public HighlightType Flare
+    {
+      get { return _flare; }
+      set
+      {
+        _flare = value;
+        if (_flare != HighlightType.None) _lava = false;
+      }
+    }
     public Point Index;
     public Vector2 World_Center;
 
