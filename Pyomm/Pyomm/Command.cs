@@ -4,13 +4,9 @@ using System.Text;
 
 namespace Pyomm
 {
-  public enum Command
+  public class Command
   {
-    RotateLeft,
-    RotateRight,
-    Go,
-    PaintRed,
-    PaintGreen,
-    PaintBlue
+    public CommandType CommandType = CommandType.Empty;
+    public HighlightType Condition = HighlightType.None;
   }
 }

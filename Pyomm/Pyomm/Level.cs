@@ -13,7 +13,7 @@ namespace Pyomm
     int F1Memory = 5;
     int F2Memory = 5;
     int F3Memory = 5;
-    List<Command> AllowedCommands = new List<Command>();
+    List<CommandType> AllowedCommands = new List<CommandType>();
 
     public Level(string levelSpecification)
     {
@@ -90,7 +90,7 @@ namespace Pyomm
             string[] commands = value.Split(',');
             foreach (string command in commands)
             {
-              AllowedCommands.Add(ParseCommand(command));
+              AllowedCommands.Add(Utility.GetCommand(command));
             }
             break;
           }
@@ -114,20 +114,6 @@ namespace Pyomm
             //TODO: parse
             break;
           }
-      }
-    }
-
-    private Command ParseCommand(string cmd)
-    {
-      switch(cmd)
-      {
-        case "RL": return Command.RotateLeft;
-        case "RR": return Command.RotateRight;
-        case "GO": return Command.Go;
-        case "PR": return Command.PaintRed;
-        case "PG": return Command.PaintGreen;
-        case "PB": return Command.PaintBlue;
-        default: throw new Exception("Unrecognized command");
       }
     }
   }

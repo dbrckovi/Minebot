@@ -10,6 +10,8 @@ namespace Pyomm
   public abstract class GuiControl
   {
     private bool _enabled = true;
+    private bool _visible = true;
+
     public Point Location = new Point(0, 0);
     public Point Size = new Point(10, 10);
     public abstract void Draw(SpriteBatch batch);
@@ -18,6 +20,12 @@ namespace Pyomm
     {
       get { return _enabled; }
       set { _enabled = value; }
+    }
+
+    public bool Visible
+    {
+      get { return _visible; }
+      set { _visible = false; }
     }
 
     public delegate void ControlDelegate (GuiControl control);
@@ -38,9 +46,9 @@ namespace Pyomm
     /// <summary>
     /// Thiggers click if control is enabled
     /// </summary>
-    public void TriggerClick()
+    public virtual void TriggerClick(Point location)
     {
-      if (_enabled) OnClick();
+      if (_enabled && _visible) OnClick();
     }
   }
 }

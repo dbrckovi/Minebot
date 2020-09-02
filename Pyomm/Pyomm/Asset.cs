@@ -16,6 +16,8 @@ namespace Pyomm
     public static Texture2D tileMiner;
     public static Texture2D tileSelection;
     public static Texture2D buttonBackground;
+    public static Texture2D commandBackground;
+    public static Texture2D commandHighlight;
     public static SpriteFont buttonFont;
 
     public static void LoadTextures(GamePyomm game)
@@ -29,6 +31,8 @@ namespace Pyomm
       tileMiner = game.Content.Load<Texture2D>("Miner");
       tileSelection = game.Content.Load<Texture2D>("Tile_Selected");
       buttonBackground = game.Content.Load<Texture2D>("Button");
+      commandBackground = game.Content.Load<Texture2D>("Command");
+      commandHighlight = game.Content.Load<Texture2D>("CommandHighlight");
       buttonFont = game.Content.Load<SpriteFont>("GeneralFont");
     }
   }

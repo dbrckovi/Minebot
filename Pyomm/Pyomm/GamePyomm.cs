@@ -6,19 +6,39 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http.Headers;
+using System.Security.Cryptography;
 
 namespace Pyomm
 {
   public class GamePyomm : Game
   {
     GuiButton btnStartStop;
-    GuiButton btnExit;
+    GuiButton btnHelp;
+    CommandMemory memoryMain;
+    CommandMemory memoryF1;
+    CommandMemory memoryF2;
+    CommandMemory memoryF3;
+    GuiButton btnConditionClear;
+    GuiButton btnConditionRed;
+    GuiButton btnConditionGreen;
+    GuiButton btnConditionBlue;
+    GuiButton btnCommandClear;
+    GuiButton btnCommandGo;
+    GuiButton btnCommandRotateLeft;
+    GuiButton btnCommandRotateRight;
+    GuiButton btnCommandPaintRed;
+    GuiButton btnCommandPaintGreen;
+    GuiButton btnCommandPaintBlue;
+    GuiButton btnCommandF1;
+    GuiButton btnCommandF2;
+    GuiButton btnCommandF3;
 
-    private Level _currentLevel;
-    private GraphicsDeviceManager _graphics;
-    private SpriteBatch _spriteBatch;
-    private bool _editMode = true;
-    private Tile[,] _tiles = new Tile[16, 16];
+    Level _currentLevel;
+    GraphicsDeviceManager _graphics;
+    SpriteBatch _spriteBatch;
+    bool _editMode = true;
+    bool _helpMode = false;
+    Tile[,] _tiles = new Tile[16, 16];
     Color _playColor = new Color(117, 94, 57);
     Color _editColor = new Color(50, 45, 27);
     Tile selectedTile = null;
@@ -27,6 +47,16 @@ namespace Pyomm
     List<GuiControl> Controls = new List<GuiControl>();
 
     GuiControl _lastMouseDownControl = null;
+
+    private bool EditMode
+    {
+      get { return _editMode; }
+      set
+      {
+        _editMode = value;
+        memoryMain.EditMode = memoryF1.EditMode = memoryF2.EditMode = memoryF3.EditMode = value;
+      }
+    }
 
     public GamePyomm()
     {
@@ -38,13 +68,13 @@ namespace Pyomm
     protected override void Initialize()
     {
       Asset.LoadTextures(this);
-      
       InitializeControls();
-      
+
       _input.KeyPressed += _input_KeyPressed;
       _input.KeyReleased += _input_KeyReleased;
       _input.MousePressed += _input_MousePressed;
       _input.MouseReleased += _input_MouseReleased;
+      _input.MouseMoved += _input_MouseMoved;
 
       _graphics.PreferredBackBufferWidth = 1280;
       _graphics.PreferredBackBufferHeight = 800;
@@ -62,25 +92,269 @@ namespace Pyomm
       }
       player.Direction = _currentLevel.PlayerStart.Direction;
       player.Location = _currentLevel.PlayerStart.Location;
+
+      EnableOrDisableButtons();
+    }
+
+    /// <summary>
+    /// Removes highlighted command from all CommandMemory controls except the specified
+    /// </summary>
+    /// <param name="exceptThis"></param>
+    private void RemoveCommandHighlights(CommandMemory exceptThis)
+    {
+      selectedTile = null;
+      if (exceptThis != memoryMain) memoryMain.HighlightedCommandIndex = null;
+      if (exceptThis != memoryF1) memoryF1.HighlightedCommandIndex = null;
+      if (exceptThis != memoryF2) memoryF2.HighlightedCommandIndex = null;
+      if (exceptThis != memoryF3) memoryF3.HighlightedCommandIndex = null;
+    }
+
+    private CommandMemory GetMemoryWithHighlight()
+    {
+      if (memoryMain.HighlightedCommandIndex != null) return memoryMain;
+      else if (memoryF1.HighlightedCommandIndex != null) return memoryF1;
+      else if (memoryF2.HighlightedCommandIndex != null) return memoryF2;
+      else if (memoryF3.HighlightedCommandIndex != null) return memoryF3;
+      else return null;
+    }
+
+    private void EnableOrDisableButtons()
+    {
+      bool commandButtonsEnabled = GetMemoryWithHighlight() != null;
+
+      btnConditionClear.Enabled = btnConditionRed.Enabled = btnConditionGreen.Enabled = btnConditionBlue.Enabled
+        = btnCommandClear.Enabled = btnCommandGo.Enabled = btnCommandRotateLeft.Enabled = btnCommandRotateRight.Enabled
+        = btnCommandPaintRed.Enabled = btnCommandPaintGreen.Enabled = btnCommandPaintBlue.Enabled
+        = btnCommandF1.Enabled = btnCommandF2.Enabled = btnCommandF3.Enabled
+        = commandButtonsEnabled;
+    }
+
+    private void _input_MouseMoved(Point p)
+    {
+      if (_editMode) this.Window.Title = p.ToString();
+    }
+
+    /// <summary>
+    /// Sets command condition to currently highlighted command
+    /// </summary>
+    /// <param name="condition"></param>
+    private void SetCommandCondition(HighlightType condition)
+    {
+      CommandMemory mem = GetMemoryWithHighlight();
+      if (mem != null) mem.SetCondition(mem.HighlightedCommandIndex.Value, condition);
+    }
+
+    /// <summary>
+    /// Sets command type to currently highlighted command
+    /// </summary>
+    /// <param name="commandType"></param>
+    private void SetCommandType(CommandType commandType)
+    {
+      CommandMemory mem = GetMemoryWithHighlight();
+      if (mem != null) mem.SetCommand(mem.HighlightedCommandIndex.Value, commandType);
     }
 
     private void InitializeControls()
     {
-      btnStartStop = new GuiButton(new Point(1000, 6));
+      btnStartStop = new GuiButton(new Point(950, 760));
       btnStartStop.Text = "START MACHINE";
-      btnStartStop.Enabled = true;
       btnStartStop.Click += BtnStartStop_Click;
       Controls.Add(btnStartStop);
 
-      btnExit = new GuiButton(new Point(1136, 752));
-      btnExit.Text = "EXIT (ESC)";
-      btnExit.Click += BtnExit_Click;
-      Controls.Add(btnExit);
+      btnHelp = new GuiButton(new Point(1150, 760));
+      btnHelp.Text = "Help";
+      btnHelp.Click += BtnHelp_Click;
+      Controls.Add(btnHelp);
+
+      btnConditionClear = new GuiButton(new Point(950, 400));
+      btnConditionClear.Text = "None";
+      btnConditionClear.Click += BtnConditionClear_Click;
+      Controls.Add(btnConditionClear);
+
+      btnConditionRed = new GuiButton(new Point(950, 434));
+      btnConditionRed.Text = "On Red (R)";
+      btnConditionRed.Click += BtnConditionRed_Click;
+      Controls.Add(btnConditionRed);
+
+      btnConditionGreen = new GuiButton(new Point(950, 468));
+      btnConditionGreen.Text = "On Green (G)";
+      btnConditionGreen.Click += BtnConditionGreen_Click;
+      Controls.Add(btnConditionGreen);
+
+      btnConditionBlue = new GuiButton(new Point(950, 502));
+      btnConditionBlue.Text = "On Blue (B)";
+      btnConditionBlue.Click += BtnConditionBlue_Click;
+      Controls.Add(btnConditionBlue);
+
+      btnCommandClear = new GuiButton(new Point(1100, 400));
+      btnCommandClear.Text = "Clear";
+      btnCommandClear.Click += BtnCommandClear_Click;
+      Controls.Add(btnCommandClear);
+
+      btnCommandGo = new GuiButton(new Point(1100, 434));
+      btnCommandGo.Text = "Forward (GO)";
+      btnCommandGo.Click += BtnCommandGo_Click;
+      Controls.Add(btnCommandGo);
+
+      btnCommandRotateLeft = new GuiButton(new Point(1100, 468));
+      btnCommandRotateLeft.Text = "Rotate left (RL)";
+      btnCommandRotateLeft.Click += BtnCommandRotateLeft_Click;
+      Controls.Add(btnCommandRotateLeft);
+
+      btnCommandRotateRight = new GuiButton(new Point(1100, 502));
+      btnCommandRotateRight.Text = "Rotate right (RR)";
+      btnCommandRotateRight.Click += BtnCommandRotateRight_Click;
+      Controls.Add(btnCommandRotateRight);
+
+      btnCommandPaintRed = new GuiButton(new Point(1100, 536));
+      btnCommandPaintRed.Text = "Paint red (PR)";
+      btnCommandPaintRed.Click += BtnCommandPaintRed_Click;
+      Controls.Add(btnCommandPaintRed);
+
+      btnCommandPaintGreen = new GuiButton(new Point(1100, 570));
+      btnCommandPaintGreen.Text = "Paint red (PR)";
+      btnCommandPaintGreen.Click += BtnCommandPaintGreen_Click;
+      Controls.Add(btnCommandPaintGreen);
+
+      btnCommandPaintBlue = new GuiButton(new Point(1100, 604));
+      btnCommandPaintBlue.Text = "Paint blue (PB)";
+      btnCommandPaintBlue.Click += BtnCommandPaintBlue_Click;
+      Controls.Add(btnCommandPaintBlue);
+
+      btnCommandF1 = new GuiButton(new Point(1100, 638));
+      btnCommandF1.Text = "Call function 1 (F1)";
+      btnCommandF1.Click += BtnCommandF1_Click;
+      Controls.Add(btnCommandF1);
+
+      btnCommandF2 = new GuiButton(new Point(1100, 672));
+      btnCommandF2.Text = "Call function 2 (F2)";
+      btnCommandF2.Click += BtnCommandF2_Click;
+      Controls.Add(btnCommandF2);
+
+      btnCommandF3 = new GuiButton(new Point(1100, 706));
+      btnCommandF3.Text = "Call function 3 (F3)";
+      btnCommandF3.Click += BtnCommandF3_Click;
+      Controls.Add(btnCommandF3);
+
+      memoryMain = new CommandMemory(new Point(950, 20));
+      memoryMain.CommandHighlighted += MemoryMain_CommandHighlighted;
+      memoryMain.Text = "Main";
+
+      memoryF1 = new CommandMemory(new Point(1034, 20));
+      memoryF1.CommandHighlighted += MemoryF1_CommandHighlighted;
+      memoryF1.Text = "F1";
+
+      memoryF2 = new CommandMemory(new Point(1118, 20));
+      memoryF2.CommandHighlighted += MemoryF2_CommandHighlighted;
+      memoryF2.Text = "F2";
+
+      memoryF3 = new CommandMemory(new Point(1202, 20));
+      memoryF3.CommandHighlighted += MemoryF3_CommandHighlighted;
+      memoryF3.Text = "F3";
+
+      Controls.Add(memoryMain);
+      Controls.Add(memoryF1);
+      Controls.Add(memoryF2);
+      Controls.Add(memoryF3);
     }
 
-    private void BtnExit_Click(GuiControl control)
+    private void BtnHelp_Click(GuiControl control)
     {
-      Exit();
+      _helpMode = true;
+    }
+
+    private void MemoryF3_CommandHighlighted(int x)
+    {
+      RemoveCommandHighlights(memoryF3);
+      EnableOrDisableButtons();
+    }
+
+    private void MemoryF2_CommandHighlighted(int x)
+    {
+      RemoveCommandHighlights(memoryF2);
+      EnableOrDisableButtons();
+    }
+
+    private void MemoryF1_CommandHighlighted(int x)
+    {
+      RemoveCommandHighlights(memoryF1);
+      EnableOrDisableButtons();
+    }
+
+    private void MemoryMain_CommandHighlighted(int x)
+    {
+      RemoveCommandHighlights(memoryMain);
+      EnableOrDisableButtons();
+    }
+
+    private void BtnCommandF3_Click(GuiControl control)
+    {
+      SetCommandType(CommandType.F3);
+    }
+
+    private void BtnCommandF2_Click(GuiControl control)
+    {
+      SetCommandType(CommandType.F2);
+    }
+
+    private void BtnCommandF1_Click(GuiControl control)
+    {
+      SetCommandType(CommandType.F1);
+    }
+
+    private void BtnCommandPaintBlue_Click(GuiControl control)
+    {
+      SetCommandType(CommandType.PaintBlue);
+    }
+
+    private void BtnCommandPaintGreen_Click(GuiControl control)
+    {
+      SetCommandType(CommandType.PaintGreen);
+    }
+
+    private void BtnCommandPaintRed_Click(GuiControl control)
+    {
+      SetCommandType(CommandType.PaintRed);
+    }
+
+    private void BtnCommandRotateRight_Click(GuiControl control)
+    {
+      SetCommandType(CommandType.RotateRight);
+    }
+
+    private void BtnCommandRotateLeft_Click(GuiControl control)
+    {
+      SetCommandType(CommandType.RotateLeft);
+    }
+
+    private void BtnCommandGo_Click(GuiControl control)
+    {
+      SetCommandType(CommandType.Go);
+    }
+
+    private void BtnCommandClear_Click(GuiControl control)
+    {
+      SetCommandType(CommandType.Empty);
+    }
+
+    private void BtnConditionBlue_Click(GuiControl control)
+    {
+      SetCommandCondition(HighlightType.Blue);
+    }
+
+    private void BtnConditionGreen_Click(GuiControl control)
+    {
+      SetCommandCondition(HighlightType.Green);
+    }
+
+    private void BtnConditionRed_Click(GuiControl control)
+    {
+      SetCommandCondition(HighlightType.Red);
+    }
+
+    private void BtnConditionClear_Click(GuiControl control)
+    {
+      SetCommandCondition(HighlightType.None);
     }
 
     private void BtnStartStop_Click(GuiControl control)
@@ -90,6 +364,8 @@ namespace Pyomm
 
     private void _input_MouseReleased(MouseButton button, int x, int y)
     {
+      if (_helpMode) return;
+
       if (button == MouseButton.Left)
       {
         #region Trigger control click
@@ -107,7 +383,7 @@ namespace Pyomm
 
           if (releasedControl == _lastMouseDownControl)
           {
-            releasedControl.TriggerClick();
+            releasedControl.TriggerClick(new Point(x, y));
             _lastMouseDownControl = null;
           }
         }
@@ -117,13 +393,15 @@ namespace Pyomm
 
     private void _input_MousePressed(MouseButton button, int x, int y)
     {
+      if (_helpMode) return;
+
       if (button == MouseButton.Left)
       {
         #region Remember mouse down control
         _lastMouseDownControl = null;
         foreach (GuiControl ctl in Controls)
         {
-          if (ctl.MouseHitTest(new Point(x,y)))
+          if (ctl.MouseHitTest(new Point(x, y)))
           {
             _lastMouseDownControl = ctl;
             break;
@@ -138,38 +416,71 @@ namespace Pyomm
 
         if (selectedTile != null)
         {
+          ClearHighlightedCommand();
+          EnableOrDisableButtons();
           if (button == MouseButton.Right) selectedTile.Lava = !selectedTile.Lava;
           else if (button == MouseButton.Middle) selectedTile.HasOre = !selectedTile.HasOre;
         }
       }
     }
 
-    private void _input_KeyPressed(Keys key)
+    private void ClearHighlightedCommand()
     {
+      CommandMemory mem = GetMemoryWithHighlight();
+      if (mem != null) mem.HighlightedCommandIndex = null;
+    }
+
+    private void _input_KeyPressed(Keys key, bool shift)
+    {
+      if (_helpMode) return;
+
       if (_editMode)
       {
-        if (key == Keys.A) player.Rotate(-1);
-        else if (key == Keys.D) player.Rotate(1);
-        else if (key == Keys.W)
-        {
-          Point newPlayerLocation = player.GetForwardLocation();
-          if (newPlayerLocation.X >= 0 && newPlayerLocation.Y >= 0 && newPlayerLocation.X <= 15 && newPlayerLocation.Y <= 15) player.Location = newPlayerLocation;
-        }
+        //if (key == Keys.A) player.Rotate(-1);
+        //else if (key == Keys.D) player.Rotate(1);
+        //else if (key == Keys.W)
+        //{
+        //  Point newPlayerLocation = player.GetForwardLocation();
+        //  if (newPlayerLocation.X >= 0 && newPlayerLocation.Y >= 0 && newPlayerLocation.X <= 15 && newPlayerLocation.Y <= 15) player.Location = newPlayerLocation;
+        //}
 
         if (selectedTile != null)
         {
-          if (key == Keys.Space) player.Location = selectedTile.Index;
+          if (key == Keys.Space)
+          {
+            if (player.Location == selectedTile.Index) player.Rotate(1);
+            else player.Location = selectedTile.Index;
+          }
           else if (key == Keys.R) selectedTile.Flare = HighlightType.Red;
           else if (key == Keys.G) selectedTile.Flare = HighlightType.Green;
           else if (key == Keys.B) selectedTile.Flare = HighlightType.Blue;
           else if (key == Keys.N) selectedTile.Flare = HighlightType.None;
         }
       }
+
+      if (key == Keys.Up || key == Keys.W) SetCommandType(CommandType.Go);
+      if (key == Keys.Left || key == Keys.A) SetCommandType(CommandType.RotateLeft);
+      if (key == Keys.Right || key == Keys.D) SetCommandType(CommandType.RotateRight);
+      if (key == Keys.R && shift) SetCommandType(CommandType.PaintRed);
+      if (key == Keys.G && shift) SetCommandType(CommandType.PaintGreen);
+      if (key == Keys.B && shift) SetCommandType(CommandType.PaintBlue);
+      if (key == Keys.F1) SetCommandType(CommandType.F1);
+      if (key == Keys.F2) SetCommandType(CommandType.F2);
+      if (key == Keys.F3) SetCommandType(CommandType.F3);
+      if (key == Keys.R && !shift) SetCommandCondition(HighlightType.Red);
+      if (key == Keys.G && !shift) SetCommandCondition(HighlightType.Green);
+      if (key == Keys.B && !shift) SetCommandCondition(HighlightType.Blue);
+      if (key == Keys.Delete) SetCommandType(CommandType.Empty);
+      if (key == Keys.Back) SetCommandCondition(HighlightType.None);
     }
 
-    private void _input_KeyReleased(Keys key)
+    private void _input_KeyReleased(Keys key, bool shift)
     {
-      if (key == Keys.Escape) Exit();
+      if (key == Keys.Escape)
+      {
+        if (_helpMode) _helpMode = false;
+        else Exit();
+      }
     }
 
     protected override void LoadContent()
@@ -180,14 +491,6 @@ namespace Pyomm
     protected override void Update(GameTime gameTime)
     {
       _input.Update();
-      //MouseState mouse = Mouse.GetState();
-      //KeyboardState keyboard = Keyboard.GetState();
-
-      //if (mouse.LeftButton == ButtonState.Pressed)
-      //{
-      //  selectedTile = GetTileUnderMouse(new Vector2(mouse.X, mouse.Y));
-      //}
-
       base.Update(gameTime);
     }
 
@@ -196,13 +499,22 @@ namespace Pyomm
       GraphicsDevice.Clear(_editMode ? _editColor : _playColor);
 
       _spriteBatch.Begin();
-      Tile.DrawTiles(_spriteBatch, _tiles);
-      player.Draw(_spriteBatch);
-      if (selectedTile != null) DrawSelectedTile();
 
-      foreach (GuiControl ctl in Controls)
+      if (_helpMode) Utility.DrawHelp(_spriteBatch);
+      else
       {
-        ctl.Draw(_spriteBatch);
+        Tile.DrawTiles(_spriteBatch, _tiles);
+        player.Draw(_spriteBatch);
+        if (selectedTile != null) DrawSelectedTile();
+
+        foreach (GuiControl ctl in Controls)
+        {
+          ctl.Draw(_spriteBatch);
+        }
+
+        _spriteBatch.DrawString(Asset.buttonFont, "Conditions", new Vector2(950, 380), Color.White);
+        _spriteBatch.DrawString(Asset.buttonFont, "Instructions", new Vector2(1100, 380), Color.White);
+
       }
 
       _spriteBatch.End();
