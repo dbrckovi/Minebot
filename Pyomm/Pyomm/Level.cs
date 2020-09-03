@@ -42,13 +42,18 @@ namespace Pyomm
       }
     }
 
+    public string SaveToString()
+    {
+      return "";
+    }
+
     private void LoadTileLine(string line, int currentRow)
     {
       char[] chars = line.ToCharArray();
       for (int x = 0; x < chars.Length; x++)
       {
         Tile tile = new Tile(x, currentRow);
-        switch(chars[x])
+        switch (chars[x])
         {
           case 'X': tile.Lava = true; break;
           case 'O': tile.HasOre = true; break;

@@ -25,7 +25,7 @@ namespace Pyomm
     public bool Visible
     {
       get { return _visible; }
-      set { _visible = false; }
+      set { _visible = value; }
     }
 
     public delegate void ControlDelegate (GuiControl control);

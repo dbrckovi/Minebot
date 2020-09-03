@@ -19,6 +19,8 @@ namespace Pyomm
     public static Texture2D commandBackground;
     public static Texture2D commandHighlight;
     public static SpriteFont buttonFont;
+    public static SpriteFont messageFont;
+    public static SpriteFont helpFont;
 
     public static void LoadTextures(GamePyomm game)
     {
@@ -34,6 +36,8 @@ namespace Pyomm
       commandBackground = game.Content.Load<Texture2D>("Command");
       commandHighlight = game.Content.Load<Texture2D>("CommandHighlight");
       buttonFont = game.Content.Load<SpriteFont>("GeneralFont");
+      messageFont = game.Content.Load<SpriteFont>("Message");
+      helpFont = game.Content.Load<SpriteFont>("Help");
     }
   }
 }

@@ -8,6 +8,8 @@
     <File>D:/git/Minebot/Pyomm/Pyomm/Content/Command.png</File>
     <File>D:/git/Minebot/Pyomm/Pyomm/Content/CommandHighlight.png</File>
     <File>D:/git/Minebot/Pyomm/Pyomm/Content/GeneralFont.spritefont</File>
+    <File>D:/git/Minebot/Pyomm/Pyomm/Content/Help.spritefont</File>
+    <File>D:/git/Minebot/Pyomm/Pyomm/Content/Message.spritefont</File>
     <File>D:/git/Minebot/Pyomm/Pyomm/Content/Miner.png</File>
     <File>D:/git/Minebot/Pyomm/Pyomm/Content/Tile_Blue_Overlay.png</File>
     <File>D:/git/Minebot/Pyomm/Pyomm/Content/Tile_Green_Overlay.png</File>
@@ -18,6 +20,8 @@
     <File>D:/git/Minebot/Pyomm/Pyomm/Content/Tile_Selected.png</File>
   </SourceFiles>
   <DestFiles>
+    <File xsi:nil="true" />
+    <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />
     <File xsi:nil="true" />

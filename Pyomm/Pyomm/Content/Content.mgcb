@@ -56,6 +56,20 @@
 /processorParam:TextureFormat=Compressed
 /build:GeneralFont.spritefont
 
+#begin Help.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Help.spritefont
+
+#begin Message.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Message.spritefont
+
 #begin Miner.png
 /importer:TextureImporter
 /processor:TextureProcessor

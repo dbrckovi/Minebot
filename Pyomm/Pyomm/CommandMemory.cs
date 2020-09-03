@@ -54,6 +54,7 @@ namespace Pyomm
 
     public override void TriggerClick(Point location)
     {
+      if (!Enabled) return;
       if (location.Y > this.Location.Y + 20 && location.Y < this.Location.Y + this.Size.Y)
       {
         int index = (location.Y - (this.Location.Y + 20)) / 20;
