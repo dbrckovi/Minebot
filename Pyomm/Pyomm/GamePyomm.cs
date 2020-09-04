@@ -80,6 +80,7 @@ namespace Pyomm
 
     protected override void Initialize()
     {
+      
       Asset.LoadTextures(this);
       InitializeControls();
 
