@@ -23,7 +23,16 @@ namespace Pyomm
         _maxCommands = value;
         if (_maxCommands > 16) _maxCommands = 16;
         if (_maxCommands < 0) _maxCommands = 0;
-        //TODO: clear extra commands
+        
+        if (_maxCommands < 16)
+        {
+          for (int x = _maxCommands; x < 16; x++)
+          {
+            SetCommand(x, CommandType.Empty);
+          }
+        }
+        
+      
       }
     }
 
@@ -83,10 +92,10 @@ namespace Pyomm
     public override void Draw(SpriteBatch batch)
     {
       batch.DrawString(Asset.buttonFont, Text, new Vector2(Location.X, Location.Y), Color.White);
-      for (int x = 0; x < 16; x++)
+      for (int x = 0; x < MaxCommands; x++)
       {
         batch.Draw(Asset.commandBackground, new Vector2(Location.X, Location.Y + 20 + x * 20), Color.White);
-        if (HighlightedCommandIndex != null && HighlightedCommandIndex.Value == x)
+        if (HighlightedCommandIndex.HasValue && HighlightedCommandIndex.Value == x)
         {
           batch.Draw(Asset.commandHighlight, new Vector2(Location.X, Location.Y + 20 + x * 20), Color.White);
         }

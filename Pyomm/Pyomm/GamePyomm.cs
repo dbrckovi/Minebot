@@ -35,6 +35,7 @@ namespace Pyomm
     GuiButton btnCommandF2;
     GuiButton btnCommandF3;
     GuiButton btnSaveLevel;
+    GuiButton btnClearLevel;
 
     CPU _cpu = new CPU();
     Level _currentLevel;
@@ -50,8 +51,12 @@ namespace Pyomm
     InputHandler _input = new InputHandler();
     List<GuiControl> Controls = new List<GuiControl>();
 
+    List<string> detectedLevels = new List<string>();
+    int _currentLevelIndex = -1;
+
     private string _message;
     Color _messageColor = Color.White;
+    bool _nextLevelAfterMessage = false;
     private DateTime _messageShownTime = DateTime.Now;
 
     GuiControl _lastMouseDownControl = null;
@@ -91,23 +96,70 @@ namespace Pyomm
       _graphics.ApplyChanges();
       _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-      _currentLevel = new Level(File.ReadAllText("DefaultLevel.lev"));
-      LoadCurrentLevel();
+      DetectLevels();
+      if (detectedLevels.Count > 0)
+      {
+        LoadNextLevel();
+      }
+      else
+      {
+        LoadLevelFromFile("DefaultLevel.lev");
+        
+      }
+
+      LoadCurrentLevelState();
 
       EnableOrDisableControls();
+    }
+
+    private void LoadLevelFromFile(string fileName)
+    {
+      _currentLevel = new Level(File.ReadAllText(fileName));
+      ShowMessage(Path.GetFileNameWithoutExtension(fileName), Color.White);
+    }
+
+    private void LoadNextLevel()
+    {
+      if (detectedLevels.Count > (_currentLevelIndex + 1))
+      {
+        _currentLevelIndex++;
+        LoadLevelFromFile(detectedLevels[_currentLevelIndex]);
+      }
+      else
+      {
+        ShowMessage("No more levels", Color.SkyBlue);
+      }
+    }
+
+    private void DetectLevels()
+    {
+      string path = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+      int i = 1;
+      while (true)
+      {
+        string levelName = $"Level{i}.lev";
+        string levelPath = Path.Combine(path, levelName);
+
+        if (File.Exists(levelPath))
+        {
+          detectedLevels.Add(levelPath);
+          i++;
+        }
+        else break;
+      }
     }
 
     private void _cpu_ExecutionFinished(InstructionResult result)
     {
       switch (result)
       {
-        case InstructionResult.AllOreGathered: ShowMessage("Congratulations!!! Level complete.", Color.Green); break;
+        case InstructionResult.AllOreGathered: ShowMessage("Congratulations!!! Level complete.", Color.Green); _nextLevelAfterMessage = !_editMode; break;
         case InstructionResult.Cancelled: ShowMessage("Execution cancelled!", Color.Yellow); break;
         case InstructionResult.Death: ShowMessage("Miner was destroyed!!!", Color.Red); break;
         case InstructionResult.Finished: ShowMessage("All ore must be mined!!!", Color.Red); break;
       }
 
-      LoadCurrentLevel();
+      LoadCurrentLevelState();
     }
 
     private void _cpu_WorkingChanged()
@@ -149,8 +201,8 @@ namespace Pyomm
         = commandButtonsEnabled;
 
       btnHelp.Enabled = !_cpu.Working;
-      btnSaveLevel.Enabled = !_cpu.Working;
-      btnSaveLevel.Visible = _editMode;
+      btnSaveLevel.Enabled = btnClearLevel.Enabled = !_cpu.Working;
+      btnSaveLevel.Visible = btnClearLevel.Visible = _editMode;
 
       memoryMain.Enabled = memoryF1.Enabled = memoryF2.Enabled = memoryF3.Enabled = !_cpu.Working;
     }
@@ -187,7 +239,7 @@ namespace Pyomm
       _messageShownTime = DateTime.Now;
     }
 
-    private void LoadCurrentLevel()
+    private void LoadCurrentLevelState(bool clearInstructions = false)
     {
       selectedTile = null;
       for (int x = 0; x <= _tiles.GetUpperBound(0); x++)
@@ -199,6 +251,21 @@ namespace Pyomm
       }
       player.Direction = _currentLevel.PlayerStart.Direction;
       player.Location = _currentLevel.PlayerStart.Location;
+      memoryMain.MaxCommands = _currentLevel.MainMemory;
+      memoryF1.MaxCommands = _currentLevel.F1Memory;
+      memoryF2.MaxCommands = _currentLevel.F2Memory;
+      memoryF3.MaxCommands = _currentLevel.F3Memory;
+
+      if (clearInstructions)
+      {
+        for (int x = 0; x < 16; x++)
+        {
+          memoryMain.SetCommand(x, CommandType.Empty);
+          memoryF1.SetCommand(x, CommandType.Empty);
+          memoryF2.SetCommand(x, CommandType.Empty);
+          memoryF3.SetCommand(x, CommandType.Empty);
+        }
+      }
     }
 
     private void SaveToCurrentLevel()
@@ -297,6 +364,11 @@ namespace Pyomm
       btnCommandF3.Click += BtnCommandF3_Click;
       Controls.Add(btnCommandF3);
 
+      btnClearLevel = new GuiButton(new Point(950, 672));
+      btnClearLevel.Text = "Clear level";
+      btnClearLevel.Click += BtnClearLevel_Click;
+      Controls.Add(btnClearLevel);
+
       btnSaveLevel = new GuiButton(new Point(950, 706));
       btnSaveLevel.Text = "Save level";
       btnSaveLevel.Click += BtnSaveLevel_Click;
@@ -322,6 +394,12 @@ namespace Pyomm
       Controls.Add(memoryF1);
       Controls.Add(memoryF2);
       Controls.Add(memoryF3);
+    }
+
+    private void BtnClearLevel_Click(GuiControl control)
+    {
+      _currentLevel = new Level(File.ReadAllText("DefaultLevel.lev"));
+      LoadCurrentLevelState(true);
     }
 
     private void BtnSaveLevel_Click(GuiControl control)
@@ -529,6 +607,9 @@ namespace Pyomm
     {
       if (_helpMode) return;
 
+      if (key == Keys.Add && _cpu.Delay > 100) _cpu.Delay /= 2;
+      if (key == Keys.Subtract && _cpu.Delay < 1600) _cpu.Delay *= 2;
+
       if (!_cpu.Working)
       {
         if (_editMode)
@@ -595,6 +676,24 @@ namespace Pyomm
     protected override void Update(GameTime gameTime)
     {
       _input.Update();
+
+      if (_message != null)
+      {
+        TimeSpan span = DateTime.Now - _messageShownTime;
+        if (span.TotalSeconds > 2)
+        {
+          _message = null;
+          if (_nextLevelAfterMessage)
+          {
+            _nextLevelAfterMessage = false;
+            LoadNextLevel();
+            LoadCurrentLevelState(true);
+          }
+        }
+
+      }
+
+
       base.Update(gameTime);
     }
 
@@ -618,17 +717,12 @@ namespace Pyomm
 
         _spriteBatch.DrawString(Asset.buttonFont, "Conditions", new Vector2(950, 380), Color.White);
         _spriteBatch.DrawString(Asset.buttonFont, "Instructions", new Vector2(1100, 380), Color.White);
+        _spriteBatch.DrawString(Asset.buttonFont, $"Speed: {5 - Math.Log2(_cpu.Delay / 100)}", new Vector2(950, 600), Color.White);
 
         if (!string.IsNullOrEmpty(_message))
         {
           _spriteBatch.DrawString(Asset.messageFont, _message, new Vector2(153, 103), Color.Black);
           _spriteBatch.DrawString(Asset.messageFont, _message, new Vector2(150, 100), _messageColor);
-
-          TimeSpan span = DateTime.Now - _messageShownTime;
-          if (span.TotalSeconds > 2)
-          {
-            _message = null;
-          }
         }
 
       }

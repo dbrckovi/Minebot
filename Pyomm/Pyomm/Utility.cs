@@ -73,6 +73,7 @@ KEYBOARD:
   R, G, B   -> Add RED, GREEN or BLUE condition
   Delete    -> Clear instruction and condition
   Backspace -> Clear condition
+  +, -      -> Increase / decrease execution speed
 
 EDITOR MODE (not finished)
 
@@ -84,8 +85,7 @@ EDITOR MODE (not finished)
   R, G, B     -> paint the tile RED, GREEN or BLUE
   N           -> Remove color from tile
 
-
-  Press ESC to close the help screen!
+                                                                                      Press ESC to close the help screen!
 ";
 
       string[] lines = text.Split(Environment.NewLine);

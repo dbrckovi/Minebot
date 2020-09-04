@@ -28,7 +28,7 @@ namespace Pyomm
       get { return _thread != null; }
     }
 
-    public int Delay = 500;
+    public int Delay = 400;
 
     public delegate void VoidDelegate();
     public delegate void InstructionResultDelegate(InstructionResult result);

@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Text;
 
 namespace Pyomm
@@ -11,9 +12,9 @@ namespace Pyomm
     public Tile[,] Tiles = new Tile[16, 16];
     public PlayerInfo PlayerStart = new PlayerInfo();
     public int MainMemory = 10;
-    int F1Memory = 5;
-    int F2Memory = 5;
-    int F3Memory = 5;
+    public int F1Memory = 5;
+    public int F2Memory = 5;
+    public int F3Memory = 5;
     List<CommandType> AllowedCommands = new List<CommandType>();
 
     public Level(string levelSpecification)
