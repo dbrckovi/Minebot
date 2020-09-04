@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics.PackedVector;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -44,7 +45,58 @@ namespace Pyomm
 
     public string SaveToString()
     {
-      return "";
+      StringBuilder sb = new StringBuilder();
+
+      #region Tiles
+      sb.AppendLine("[TILES]");
+      sb.AppendLine(@";X - lava
+;. - empty
+;O - ore
+;r - empty with red flare
+;g - empty with green flare
+;b - empty with blue flare
+;R - with ore and red flare
+;G - with ore and green flare
+;B - with ore and blue flare");
+
+      for (int y = 0; y < 16; y++)
+      {
+        for (int x = 0; x < 16; x++)
+        {
+          Tile tile = Tiles[x, y];
+
+          if (tile.Lava) sb.Append("X");
+          else
+          {
+            switch (tile.Flare)
+            {
+              case HighlightType.None: sb.Append(tile.HasOre ? "O" : "."); break;
+              case HighlightType.Red: sb.Append(tile.HasOre ? "R" : "r"); break;
+              case HighlightType.Green: sb.Append(tile.HasOre ? "G" : "g"); break;
+              case HighlightType.Blue: sb.Append(tile.HasOre ? "B" : "b"); break;
+            }
+          }
+        }
+        sb.AppendLine();
+      }
+      #endregion Tiles
+
+      #region Settings
+      sb.AppendLine($"[SETTINGS]");
+      sb.AppendLine($"PlayerStart={PlayerStart.Location.X},{PlayerStart.Location.Y}");
+      sb.AppendLine($"PlayerDirection={(int)PlayerStart.Direction}");
+      sb.AppendLine($"MainMemory={MainMemory}");
+      sb.AppendLine($"F1Memory={F1Memory}");
+      sb.AppendLine($"F2Memory={F2Memory}");
+      sb.AppendLine($"F3Memory={F3Memory}");
+      sb.AppendLine($"AllowedCommands=RL,RR,GO,PR,PG,PB,F1,F2,F3");
+      sb.AppendLine($"SolutionMain=");
+      sb.AppendLine($"SolutionF1=");
+      sb.AppendLine($"SolutionF2=");
+      sb.AppendLine($"SolutionF3=");
+      #endregion Settings
+
+      return sb.ToString();
     }
 
     private void LoadTileLine(string line, int currentRow)
