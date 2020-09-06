@@ -14,7 +14,7 @@ namespace Pyomm
     int _maxCommands = 16;
     bool _editMode = true;
     public int? HighlightedCommandIndex = null;
-    
+
     public int MaxCommands
     {
       get { return _maxCommands; }
@@ -23,7 +23,7 @@ namespace Pyomm
         _maxCommands = value;
         if (_maxCommands > 16) _maxCommands = 16;
         if (_maxCommands < 0) _maxCommands = 0;
-        
+
         if (_maxCommands < 16)
         {
           for (int x = _maxCommands; x < 16; x++)
@@ -31,8 +31,8 @@ namespace Pyomm
             SetCommand(x, CommandType.Empty);
           }
         }
-        
-      
+
+
       }
     }
 
@@ -75,18 +75,22 @@ namespace Pyomm
       }
     }
 
-    public void SetCommand(int index, CommandType commandType)
+    public void SetCommand(int index, CommandType commandType, bool highlightNext = true)
     {
       if (index < _maxCommands)
       {
         Memory[index].CommandType = commandType;
         if (commandType == CommandType.Empty) Memory[index].Condition = HighlightType.None;
+        if (highlightNext && index + 1 < MaxCommands) HighlightedCommandIndex = index + 1;
       }
     }
 
     public void SetCondition(int index, HighlightType condition)
     {
-      if (index < _maxCommands) Memory[index].Condition = condition;
+      if (index < _maxCommands)
+      {
+        Memory[index].Condition = condition;
+      }
     }
 
     public override void Draw(SpriteBatch batch)

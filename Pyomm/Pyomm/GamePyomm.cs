@@ -267,6 +267,8 @@ namespace Pyomm
           memoryF3.SetCommand(x, CommandType.Empty);
         }
       }
+
+      memoryMain.HighlightedCommandIndex = memoryF1.HighlightedCommandIndex = memoryF2.HighlightedCommandIndex = memoryF3.HighlightedCommandIndex = null;
     }
 
     private void SaveToCurrentLevel()
